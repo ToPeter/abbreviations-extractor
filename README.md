@@ -30,3 +30,13 @@ See also <https://github.com/ainthek/nconv> for
 - test style
 - view history and older commits to see how the tool has advanced in time (I want the same on this project)
 - find as many real time examples for URLs and use them in tests (local copy)
+
+TODO: refactor 
+
+Documentation:
+
+curl http://www.who.int/classifications/ichi/en/
+-respond is entire HTML of website which we are requesting 
+
+pandoc -f html -t markdown
+-an absolute URI is given. In this case pandoc will fetch the content using HTTP. Result is body of requested website
