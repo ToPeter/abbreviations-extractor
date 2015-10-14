@@ -1,0 +1,245 @@
+      ====================================================================
+	DR  6502    AER 201S Engineering Design 6502 Execution Simulator
+      ====================================================================
+
+      Supplementary Notes                                   By: M.J.Malone
+
+      
+      	      Addressing Modes - The Meaning of Arg, Offset and Dest
+      	      ======================================================
+      
+	   Arg,  Offset  and  Dest   are   the   arguments   for   various
+      instructions.   Since  the  arguments  of  instructions  are usually
+      referred to by their addresses, the different methods of  expressing
+      arguments  are called addressing modes.  'Arg' type addressing modes
+      refer to a piece of data  usually  by  its  address.   The  'Offset'
+      addressing  mode  is  used  by  branch  statements to give a program
+      destination by an offset byte.  'Dest' addressing modes are used  to
+      point to a destination in the program.
+
+
+      The Use of Labels
+      =================
+
+	   Assembly  code  more  often  uses  assembler labels than actual
+      numbers as arguments to increase the readability.  In the  following
+      example  the  address  of  the  VIA  port,  a  commonly  used memory
+      location, will be assigned a descriptive  name  to  make  its  later
+      occurrences in assembly code more legible:
+ 
+      ;
+      Port_A = $A001
+      ;
+ 
+      Here  is  another  example  where a label is assigned the value of a
+      commonly used constant for improved readability:
+ 
+      ;
+      MotorBit_Mask = %0000111
+      ;
+ 
+	   The use of labels can vastly change the appearance of  assembly
+      but does not alter the behavior of addressing modes at all.
+ 
+      The Addressing Modes
+      ====================
+ 
+      If there are No Arguments:
+      --------------------------
+ 
+ 
+      0) Implied
+ 
+	   Some  instructions (ie.  CLC, SEC, CLD, NOP, BRK, PHA, RTI, RTS
+      etc) do not require arguments.  In this case the argument is said to
+      be 'IMPLIED'  in  the  instruction.   This  is  called  the  implied
+      addressing mode.
+ 
+      In Assembly:       CLC
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                            page 2 
+ 
+      'Arg':  Refers to a place to find data, usually a memory location
+      -----------------------------------------------------------------
+ 
+ 
+      1) Accumulator
+ 
+	   The vast majority of statements manipulate data in one  way  or
+      another and require data for arguments.  The first and easiest piece
+      of  data  to  use  as  an  argument is the .A accumulator.  Operator
+      instructions such as ROL, ROR, ASL and LSR (and INC and DEC  in  the
+      65C02) can use the ACCUMULATOR addressing mode.
+ 
+      In Assembly:       ROR A
+ 
+ 
+ 
+      2) Immediate
+ 
+	   Often a constant (a number) is required in  calculations.   LDA
+      #$00  takes  the  number  (#)  $00 and places it in the accumulator.
+      This  is  called  the  IMMEDIATE  addressing  mode.   The  following
+      statements can be used with the immediate addressing mode: ADC, AND,
+      CMP, CPX, CPY, EOR, LDA, LDX, LDY, ORA and SBC.
+ 
+      In Assembly:  ADC #$01
+		    LDA #Constant
+		    EOR #Bit_Mask
+		    CMP #5
+ 
+ 
+      3) Zero Page
+ 
+	   The  memory  of  the  6502  is divided into $100 (256) pages of
+      $100 (256) bytes each.  The pages are numbered from 0  through  $FF.
+      Page  0  address  are in the range $0000-$00FF.  Because 'Zero Page'
+      addresses can be specified in just one byte, instructions using them
+      as arguments  can  be  executed  more  quickly  by  the  6502.   The
+      statement  LDA  $80  causes  the 6502 to fetch the value from memory
+      location $0080 and place it in the accumulator.  Note that the  only
+      difference  between  the  immediate  and  zero  page syntax is the #
+      number sign.  LDA #$80 means  load  the  number  (#)  $80  into  the
+      accumulator.   LDA  $80  means  load the contents of memory location
+      $0080  into  the  accumulator.   When  reading  assembly  code,  the
+      difference  is  subtle but very important.  Zero page addressing can
+      be used with every instruction  that  uses  a  data  type  argument.
+      (This  excludes  only those that use no argument: CLC, RTI, NOP etc.
+      or a program go to type argument JMP xxxx, JSR xxxx etc.)
+ 
+      In Assembly: ADC $80
+		   LDA Temp        ( Assuming  $00 <= Temp <= $FF )
+ 
+ 
+      4) X and Y Indexed Zero Page
+ 
+	   Often data is organized into groups of bytes  as  a  table,  an
+      array  or  a  record.   In  this case it is convenient to specify an
+      address  as  an  offset  relative  to  the  beginning  of  the  data
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                            page 3 
+ 
+      structure.    The   6502   implements   this  method  using  INDEXED
+      addressing.  In this case the .X or .Y register is used to add to  a
+      zero  page address to result in an effective address.  IE: LDA $80,X
+      (when  .X=#$05)  results   in   a   fetch   from   memory   location
+      ($0080+$05)=$0085.    This   is  called  the  ZERO  PAGE  X  INDEXED
+      addressing mode.  The zero page x indexed  addressing  mode  can  be
+      used  with all instructions except BIT, CPX, CPY, LDX and STX.  Note
+      that the .X and .Y registers can take on values of only  $00-$FF  so
+      the data table is limited in size to $100 bytes.
+ 
+	   There  is also a Y indexed zero page addressing mode but it can
+      be used only with the LDX and STX instructions.  This may seem  very
+      limiting at first but consider the high level expression:
+ 
+	   code = Data[ Index_Pointer[i] ];
+ 
+      Where  Index_Pointer[]  is a small look-up table of pointers to data
+      in the look-up table Data[].  This can be coded easily as:
+ 
+		  LDY i
+		  LDX Index_Pointer,Y
+		  LDA Data,X
+		  STA code             ;  14 machine cycles total
+ 
+      Note that indexed zero page addressing cannot result in an effective
+      address outside the zero page.  If the sum of the value  in  the  .X
+      register  and  the  base address exceed $FF then the fetch will wrap
+      around to $00 again.  For example if the .X register were #$20  then
+      the following memory fetch 'LDA $F0,X' would result in the effective
+      address  of  ($00F0+$20)=$0110 but the memory fetch would be done on
+      address $0010, still on the zero page.
+ 
+	   Note that indexed zero page addressing always takes one machine
+      cycle more than non-indexed zero page addressing and hence should be
+      avoided.  Often programmers get  in  the  habit  of  creating  small
+      indexed loops to perform operations resulting in a shorter length of
+      assembly   code.   In  the  case  of  mathematics  subroutines  that
+      manipulate multibyte numbers on the zero page, loops should never be
+      used.  The extra overhead required in the INcrement or DEcrement and
+      the Branch instructions as well as the extra machine cycle  in  each
+      indexed  reference can make these routines take almost twice as long
+      to execute as the unravelled equivalent  non-indexed  routines.   5)
+      Absolute
+ 
+	    Usually  arguments  are  not  stored only on the zero page but
+      come from anywhere in memory.  The easiest way to specify a  general
+      memory  address is to give the full 16 bit address.  For example LDA
+      $8000, loads the 8 bit number ($00-$FF)  from  the  memory  location
+      $8000.   This method of specifying an address is called the ABSOLUTE
+      addressing mode.
+ 
+      In Assembly:       LDA Port_A
+			 ADC $C000
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                                                            page 4 
+ 
+      6) X and Y Indexed Absolute
+ 
+	   As with  zero  page  addressing,  absolute  addressing  can  be
+      indexed  as well allowing the entire address space of the 6502 to be
+      used in data tables.  The X indexed absolute addressing mode may not
+      be used with: BIT, CPX, CPY, LDX, STX or STY but may  be  used  with
+      LDY.  The Y indexed absolute addressing has a similar list except it
+      can  be used for LDX and not LDY and cannot be used for the operator
+      instructions ASL, DEC, INC, LSR, ROL or ROR.
+	   The absolute X and Y indexed addressing modes require the  SAME
+      number  of clock cycles to perform as the non-indexed absolute mode.
+      There is therefore NO PENALTY in access time for referring  to  data
+      as  part  of  a  table  through indexed addressing in absolute mode.
+      There is of course the INcrement or DEcrement statement, the  Branch
+      and possibly the ComParison to create the indexed loop that requires
+      more time over sequential, direct, absolute fetches.  The large size
+      of   data  tables  located  outside  the  zero  page  usually  makes
+      sequential absolute fetches impractical since the number of assembly
+      language statements is directly dependent on the size of the  table.
+      If the size of the table is variable then indexing must be used.  It
+      is  often desirable therefore to use indexed absolute addressing and
+      data tables to organize data and  reduce  the  length  of  the  code
+      through indexed loops.
+	   There  are  exceptions  to the above statement that indexed and
+      non-indexed absolute addressing require the same number of cycles to
+      execute.  The first exception is the use  of  X  indexing  with  the
+      operator  instructions  (Y indexing is not available) ASL, DEC, INC,
+      LSR, ROL and ROR.  For  these  instructions,  the  indexed  absolute
+      addressing  mode  always takes one additional cycle over the regular
+      absolute addressing mode.
+	   The second exception has to do with memory pages.  For absolute
+      indexed addressing, if the effective address calculation crosses  to
+      the  next  memory  page then an additional machine cycle is required
+      for the calculation of the effective address.  If  the  .Y  register
+      is  #$80  then  the  memory  fetch 'LDA $80C0,Y' crosses from memory
+      page $80 into memory page $81, since the effective address is $8140,
+      and therefore requires an extra machine cycle  to  perform.   It  is
+      recommended  that  data tables be placed entirely on one memory page
+      whenever possible to speed  program  execution.
+ 
+      In Assembly:  LDA Game_Board,X
+		    STA $1000,Y
+ 
+ 
