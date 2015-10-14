@@ -13,12 +13,23 @@ rl.on('line', function (line) {
 
   if(patt.test(line) && line.match(patt).toString().length != 1 ){
 
+    
+    var patt1 = /\b[A-Z]+\b/g;
+
+    if (line.match(patt1).length > 1) {
+      
+      while (patt1.test(line)==true) 
+      {
+        console.log("index"+patt1.lastIndex)
+
+      }
+    };
+
     // TO-FINISH: check how many capital-letter words are in line
     //if(line.match(/\b[A-Z]+\b/g).length > 1) console.log(line.match(/\b[A-Z]+\b/g).length);
     // while (line.match(/\b[A-Z]+\b/g).length > 0){  countOfShortcuts--}
     
     var mergedString = previousLine.concat(" "+line);
-
     var sizeOfPreviousLine = previousLine.length;
     var lenghtOfShortcut = line.match(patt).toString().length;
     var firstCharacterValue = line.match(patt).toString().charAt(0);
