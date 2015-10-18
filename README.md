@@ -20,10 +20,6 @@ Shall produce:
 	...
 
 
-So the goal is to extract abbrevs in as many forms as you can support.
-
-But I need the first dummy version ASAP.
-
 See also <https://github.com/ainthek/nconv> for
 
 - project structure
@@ -31,7 +27,34 @@ See also <https://github.com/ainthek/nconv> for
 - view history and older commits to see how the tool has advanced in time (I want the same on this project)
 - find as many real time examples for URLs and use them in tests (local copy)
 
-## Reading pipe
+## Required
+
+To use this module, do require('readline'). Readline allows reading of a stream (such as process.stdin) on a line-by-line basis.
+
+	$ npm install readline
+
+(For more info visit [this page](https://nodejs.org/api/readline.html))
+
+
+## Ideal format
+
+*World Healt Organization WHO
+
+*World Healt Organization (WHO)
+
+*exmple example World 
+Healt Organization WHO
+
+## Issues (TODO)
+
+1. Stream is looking for **'/n'** sign so in case the text is formatted in a wrong way program takes bigger chucks of text than it is suppose to
+
+2. If there is a random capitalized word in a text it will be considered as abbrev. 
+
+3. **MAIN ISSUE** if abbrev and text describing meaning of it is all written CAPITALIZED program will consider each word as abbrev. **In case** that entire sentence in text is capitalized then the sentence is not taken into consideraton. 
+
+
+
 
 
 

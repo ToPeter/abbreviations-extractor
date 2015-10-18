@@ -1,80 +1,70 @@
-var stdin = process.openStdin();
+var readline = require('readline');
 
-var data = "";
+var patt = /\b[A-Z]{2,}\b/g; 
+var patt1 = /[a-z]/;
+var previousLine = "";
 
-stdin.on('data', function(chunk) {
-  data += chunk;
+var rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  terminal: false
 });
 
-stdin.on('end', function() {
-
-  //TODO check: not sure if .toString() is needed
-  var allData = data.toString();
-
- var x=0;
- var openParenthesis = "(";
+rl.on('line', function (line) {
 
 
- while (x <= allData.length){ 
+  if(patt.test(line) && patt1.test(line)){
 
-  var curentValue = allData.charAt(x);
-  if (curentValue.valueOf() === openParenthesis.valueOf()){
-    var j=0;
-    var closeParenthesis = ")";
-    var inBrackets ="";
+    arrayOfAbbrs = line.match(patt).toString().split(',');
 
-    while(allData.charAt(x+j).valueOf() !== closeParenthesis.valueOf())j++;
-    var sizeOfShortcut = j--;
-    for (var k = 1; k < sizeOfShortcut; k++) {
-        var symbolFromBrackets = allData.charAt(x+k);
-        // TODO: REFACTOR !!! + checks ONLY abbreviations with capital letters 
 
-            if (symbolFromBrackets === symbolFromBrackets.toUpperCase() && symbolFromBrackets !== "#" 
-                && symbolFromBrackets !== "/" && symbolFromBrackets !== "."){
-                inBrackets += symbolFromBrackets;
-            }
-            else break; 
+    for (var i = 0; i < arrayOfAbbrs.length; i++) {
+      var mergedString = previousLine.concat(" "+line);
+      var positionOfAbbr = mergedString.search(arrayOfAbbrs[i]);
+      var subStringWhereSearch = mergedString.substring(0,positionOfAbbr);
+      var sizeOfAbbr = arrayOfAbbrs[i].length;
+      var duplicates = 0;
 
-    };
+      var numberOfSpaces = 0;
 
-        if (inBrackets){
-            
+ 
+      
+        // abbr: HHH <- counts number of same letters       
+        for (var n = 1; n < sizeOfAbbr; n++) {
+          if(arrayOfAbbrs[i].charAt(0) === arrayOfAbbrs[i].charAt(n))duplicates++;
+          };
 
-            //Code which checks duplicates in entire word
-            //var hasDuplicates = (/([a-zA-Z]).*?\1/).test(inBrackets);
 
-            var numOfDuplicates = 1;
-            var u = 0;
-
-            for (var n = 1; n < inBrackets.length; n++) {
-                if (inBrackets.charAt(0).valueOf() === inBrackets.charAt(n).valueOf())numOfDuplicates++;
+        if (duplicates > 0){
+          duplicates++;
+           for (var k = subStringWhereSearch.length; k > 0; k--) {
+            if (subStringWhereSearch.charAt(k) === " ")numberOfSpaces++;
+            if(subStringWhereSearch.charAt(k) === arrayOfAbbrs[i].charAt(0))duplicates--;
+              
+              if (duplicates === 0 ){
+                console.log(mergedString.substring(k,subStringWhereSearch.length+sizeOfAbbr));;
+                break;
+                }
+              else if (numberOfSpaces > sizeOfAbbr+sizeOfAbbr/2) break;          
             };
+        }
 
-            if(numOfDuplicates > 1){
-                // TODO: refactor + better wildcat check
-                for (var h = 0; h < numOfDuplicates; h++) {
-                 while(allData.charAt(x-u).valueOf() !== inBrackets.charAt(0).valueOf() 
-                      && allData.charAt(x-u).valueOf() !== "[")u++;
-                        u++;
-                };
-                    console.log(allData.substring(x-u,x+sizeOfShortcut+1));
-
+        else {
+          for (var j = subStringWhereSearch.length; j > 0; j--) {
+            if (subStringWhereSearch.charAt(j) === " ")numberOfSpaces++;
+            if(subStringWhereSearch.charAt(j) === arrayOfAbbrs[i].charAt(0)){
+              console.log(mergedString.substring(j,subStringWhereSearch.length+sizeOfAbbr));
+              break;
             }
+            else if (numberOfSpaces > sizeOfAbbr+sizeOfAbbr/2) break;
             
-                else{
-                        var u = 0;
-                        // TODO: refactor + better wildcat check
-                        while(allData.charAt(x-u).valueOf() !== inBrackets.charAt(0).valueOf() 
-                              && allData.charAt(x-u).valueOf() !== "[" )u++;
-                            var result = allData.substring(x-u,x+sizeOfShortcut+1)
-                            //TODO: better check for formate errors
-                            console.log(result.replace(/(\r\n|\n|\r)/gm,""));
-
-                    }    
-        };
-             
+          };
+        }
+    };
   } 
-  x++;
-}
+  previousLine = line; 
 
-});
+})
+  .on('close',function(){
+    console.log("----END----");
+  });
