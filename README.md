@@ -38,12 +38,12 @@ To use this module, do require('readline'). Readline allows reading of a stream 
 
 ## Ideal format
 
-*World Healt Organization WHO
+Blah blah blah blah World Healt Organization WHO
 
-*World Healt Organization (WHO)
+Blah blah blah blah World Healt Organization (WHO)
 
-*exmple example World 
-Healt Organization WHO
+blah blah exmple example World 
+Healt Organization WHO 
 
 ## Issues (TODO)
 
