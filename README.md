@@ -53,6 +53,12 @@ Healt Organization WHO
 
 3. **MAIN ISSUE** if abbrev and text describing meaning of it is all written CAPITALIZED program will consider each word as abbrev. **In case** that entire sentence in text is capitalized then the sentence is not taken into consideraton. 
 
+## Resources
+
+https://nodejs.org/api/readline.html
+
+https://developer.mozilla.org/en/docs/Web/JavaScript/Guide/Regular_Expressions
+
 
 
 
